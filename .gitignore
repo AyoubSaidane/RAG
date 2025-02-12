@@ -1,0 +1,4 @@
+__pycache__/
+knowledge_base/
+venv/
+.env
