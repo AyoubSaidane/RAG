@@ -5,8 +5,6 @@ faiss-cpu
 python-pptx
 pillow
 pdf2image
-Office365-REST-Python-Client
-dotenv
 uvicorn
 fastapi
 pydantic

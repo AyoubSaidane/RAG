@@ -1,6 +1,7 @@
 import requests
 from dotenv import load_dotenv
 import os
+import re
 load_dotenv()
 
 tenant_id = os.getenv("TENANT_ID")
@@ -8,6 +9,8 @@ tenant_name = os.getenv("TENANT_NAME")
 client_id = os.getenv("CLIENT_ID")
 client_secret = os.getenv("CLIENT_SECRET")
 site_name = os.getenv("SITE_NAME")
+folder = 'Presentations'
+local_directory = './Presentations/'
 
 
 
@@ -56,7 +59,7 @@ def fetch_items(drive_id, access_token, folder):
     response = requests.request("GET", url, headers=headers)
     return response.json().get("value")
 
-def download_file(url, destination_path):
+def download_item(url, destination_path):
     try:
         # Create the directory if it doesn't exist
         os.makedirs(os.path.dirname(destination_path), exist_ok=True)
@@ -71,13 +74,20 @@ def download_file(url, destination_path):
     except requests.exceptions.RequestException as e:
         print(f"Error downloading file: {e}")
 
+def download_items(drive_id, access_token, folder, local_directory):
+    print(local_directory)
+    os.makedirs(os.path.dirname(local_directory), exist_ok=True)
+    fetch_data = fetch_items(drive_id, access_token, folder)
+    for item in fetch_data:
+        item_name = item.get("name")
+        if bool(re.search(r'\.\w+$', item_name)):
+            item_url = item.get("@microsoft.graph.downloadUrl")
+            download_item(item_url, f"{local_directory}/{item_name}")
+        else:
+            download_items(drive_id, access_token, f"{folder}/{item_name}", f"{local_directory}/{item_name}/")
 
 
 access_token = access_token(client_id, tenant_id, client_secret)
 site_id = site_id(tenant_name, site_name, access_token)
 drive_id = drive_id(site_id, access_token)
-
-folder = 'Presentations'
-fetch_data = fetch_items(drive_id, access_token, folder)
-download_url,download_filename = fetch_data[1].get("@microsoft.graph.downloadUrl"), fetch_data[1].get("name")
-download_file(download_url, f"./downloads/{download_filename}")
+download_items(drive_id, access_token, folder, local_directory)

@@ -1,4 +1,9 @@
 __pycache__/
+images/
+Presentations/
 knowledge_base/
+ignore/
 venv/
 .env
+
+
